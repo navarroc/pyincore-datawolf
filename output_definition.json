@@ -1,0 +1,10 @@
+{
+   "BuildingDamage":{
+      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv"},
+      "damage_result": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+   },
+   "BridgeDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+   }
+}
