@@ -3,25 +3,26 @@
 """ DataWolf wrapper for pyincore analyses
 """
 import importlib
-import os
-from os import path
-# from pathlib import Path
-# import json
-from pyincore import IncoreClient, InsecureIncoreClient, FragilityService, DataService, MappingSet
-# from pyincore.dataset import Dataset
-from pyincore.analyses.buildingdamage import BuildingDamage
-# from pyincore.utils.dataprocessutil import DataProcessUtil
-# import pyincore.analyses.buildingdamage.buildingdamage
+from pyincore import IncoreClient, FragilityService, MappingSet
 import argparse
 import datetime
 
 
 def main(cl_args):
-    # TODO - get this from the cl_args
-    client = IncoreClient("https://incore-dev.ncsa.illinois.edu")
     print("start time:-", datetime.datetime.now())
-    full_analysis = args.analysis
 
+    # IN-CORE token (optional)
+    token = args.token
+
+    # IN-CORE Service URL
+    service_url = args.service_url
+
+    # Create IN-CORE client
+    client = IncoreClient(service_url, token)
+
+    # pyIncore analysis in the form of module path and analysis class to load
+    # e.g. pyincore.analyses.buildingdamage:BuildingDamage
+    full_analysis = args.analysis
 
     analysis_parts = full_analysis.split(":")
     analysis_path = analysis_parts[0]
@@ -31,29 +32,21 @@ def main(cl_args):
     print("Loaded " + analysis_path + " successfully")
     analysis_class = getattr(module, analysis_name)
 
-    # Class to dynamically create
-    MyClazz = type(str(analysis_class), (analysis_class,), {})
-
-    # Create pyincore class
-    py_analysis = MyClazz(client)
-
-    print("This class was dynamically created")
-    print(type(py_analysis))
-
-    # Create pyincore analysis explicitly
-    bldg_dmg = BuildingDamage(client)
-    print("This class was explicitly created")
-    print(type(bldg_dmg))
+    # Create pyincore analysis specified
+    py_analysis = analysis_class(client)
 
     # Create connection to Fragility service
     fragility_service = FragilityService(client)
 
-    # TODO - go through the spec and auto-load all dataset/mappings
+    # Set the analysis inputs
+    print("Set input datasets and parameters for " + analysis_name)
     set_analysis_inputs(py_analysis, fragility_service, cl_args)
 
+    # Execute the analysis
+    print("Execute " + analysis_name)
     py_analysis.run_analysis()
 
-    print(analysis_class + " completed", datetime.datetime.now())
+    print(analysis_name + " completed", datetime.datetime.now())
 
 
 def set_analysis_inputs(analysis, fragility_service, args):
@@ -67,13 +60,13 @@ def set_analysis_inputs(analysis, fragility_service, args):
         if args.__contains__(param_id):
             param_arg = args[param_id]
             param_type = input_param["type"]
-            if param_type == int:
+            if param_type == int and len(param_arg) > 0:
                 param_arg = int(param_arg)
-            elif param_type == float:
+            elif param_type == float and len(param_arg) > 0:
                 param_arg = float(param_arg)
-            elif param_type == bool:
+            elif param_type == bool and len(param_arg) > 0:
                 param_arg = bool(param_arg)
-            if param_arg is not None and param_arg != "":
+            if param_arg is not None and len(param_arg) > 0:
                 analysis.set_parameter(param_id, param_arg)
 
     # Load the input datasets and any fragility mapping
@@ -86,18 +79,15 @@ def set_analysis_inputs(analysis, fragility_service, args):
         for input_type in input_types:
             if input_type == "incore:dfr3MappingSet":
                 is_dfr3 = True
-                print("found dfr3 mapping, load differently")
-                print(input_id)
 
         if args.__contains__(input_id):
             dataset_id = args[input_id]
-            if not is_dfr3:
-                analysis.load_remote_input_dataset(input_id, dataset_id)
-                print("loaded input dataset")
-            else:
-                mapping_set = MappingSet(fragility_service.get_mapping(dataset_id))
-                analysis.set_input_dataset(input_id, mapping_set)
-                print("loaded fragility mapping")
+            if len(dataset_id) > 0:
+                if not is_dfr3:
+                    analysis.load_remote_input_dataset(input_id, dataset_id)
+                else:
+                    mapping_set = MappingSet(fragility_service.get_mapping(dataset_id))
+                    analysis.set_input_dataset(input_id, mapping_set)
 
 
 if __name__ == '__main__':
@@ -105,6 +95,8 @@ if __name__ == '__main__':
     # Name of the pyincore analysis to create and run
     parser = argparse.ArgumentParser(description='Run pyincore building damage analysis.')
     parser.add_argument('--analysis', dest='analysis', help='Analysis name')
+    parser.add_argument('--token', dest='token', help='Service token')
+    parser.add_argument('--service_url', dest='service_url', help='Service endpoint')
 
     args, unknown = parser.parse_known_args()
 
