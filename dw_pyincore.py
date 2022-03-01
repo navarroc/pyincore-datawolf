@@ -3,9 +3,10 @@
 """ DataWolf wrapper for pyincore analyses
 """
 import importlib
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, FragilityService, MappingSet, Dataset
 import argparse
 import datetime
+import json
 
 
 def main(cl_args):
@@ -38,9 +39,16 @@ def main(cl_args):
     # Create connection to Fragility service
     fragility_service = FragilityService(client)
 
+    # Read input definition - determines which input datasets should come from chained analyses
+    input_def_file = open("input_definition.json")
+    analysis_input = json.load(input_def_file)
+    analysis_input_definitions = []
+    if analysis_parts[1] in analysis_input:
+        analysis_input_definitions = analysis_input[analysis_parts[1]]
+
     # Set the analysis inputs
     print("Set input datasets and parameters for " + analysis_name)
-    set_analysis_inputs(py_analysis, fragility_service, cl_args)
+    set_analysis_inputs(py_analysis, fragility_service, cl_args, analysis_input_definitions)
 
     # Execute the analysis
     print("Execute " + analysis_name)
@@ -49,7 +57,7 @@ def main(cl_args):
     print(analysis_name + " completed", datetime.datetime.now())
 
 
-def set_analysis_inputs(analysis, fragility_service, args):
+def set_analysis_inputs(analysis, fragility_service, args, analysis_input_definitions):
     spec = analysis.get_spec()
 
     # Set the analyis parameters
@@ -66,7 +74,7 @@ def set_analysis_inputs(analysis, fragility_service, args):
                 param_arg = float(param_arg)
             elif param_type == bool and len(param_arg) > 0:
                 param_arg = bool(param_arg)
-            if param_arg is not None and len(param_arg) > 0:
+            if param_arg is not None and len(str(param_arg)) > 0:
                 analysis.set_parameter(param_id, param_arg)
 
     # Load the input datasets and any fragility mapping
@@ -83,17 +91,23 @@ def set_analysis_inputs(analysis, fragility_service, args):
         if args.__contains__(input_id):
             dataset_id = args[input_id]
             if len(dataset_id) > 0:
-                if not is_dfr3:
-                    analysis.load_remote_input_dataset(input_id, dataset_id)
+                if input_id in analysis_input_definitions:
+                    print("found an chained anlaysis output")
+                    print("input id is: "+input_id)
+                    print("data type is "+input_types[0])
+                    analysis.set_input_dataset(input_id, Dataset.from_file(dataset_id, input_types[0]))
                 else:
-                    mapping_set = MappingSet(fragility_service.get_mapping(dataset_id))
-                    analysis.set_input_dataset(input_id, mapping_set)
+                    if not is_dfr3:
+                        analysis.load_remote_input_dataset(input_id, dataset_id)
+                    else:
+                        mapping_set = MappingSet(fragility_service.get_mapping(dataset_id))
+                        analysis.set_input_dataset(input_id, mapping_set)
 
 
 if __name__ == '__main__':
 
     # Name of the pyincore analysis to create and run
-    parser = argparse.ArgumentParser(description='Run pyincore building damage analysis.')
+    parser = argparse.ArgumentParser(description='Run pyincore analysis.')
     parser.add_argument('--analysis', dest='analysis', help='Analysis name')
     parser.add_argument('--token', dest='token', help='Service token')
     parser.add_argument('--service_url', dest='service_url', help='Service endpoint')
@@ -125,6 +139,7 @@ if __name__ == '__main__':
     if key not in args_dict:
         if len(values.split()) > 1:
             values = values.split()
+
         args_dict[key] = values.strip()
 
     # Pass the command line args to main to setup and run the pyincore analysis

@@ -6,5 +6,23 @@
    "BridgeDamage":{
       "result": { "mimeType" : "text/csv", "filename": "*.csv"},
       "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+   },
+   "MeanDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   },
+   "CapitalShocks":{
+      "sector_shocks": { "mimeType" : "text/csv", "filename": "*.csv"}
+   },
+   "MonteCarloFailureProbability":{
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv"},
+      "sample_damage_states": { "mimeType" : "text/csv", "filename": "*_sample_damage_states.csv"}
+   },
+   "JoplinCGEModel":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
    }
 }

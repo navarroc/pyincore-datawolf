@@ -1,0 +1,6 @@
+{
+   "MonteCarloFailureProbability" : ["damage"],
+   "MeanDamage": ["damage"],
+   "JoplinCGEModel": ["sector_shocks"],
+   "CapitalShocks": ["failure_probability"]
+}

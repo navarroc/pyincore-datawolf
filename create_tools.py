@@ -31,7 +31,7 @@ def import_submodules(package, recursive=True):
     return results
 
 
-def create_tool(analysis, output_definitions):
+def create_tool(analysis, input_definitions, output_definitions):
 
     # TODO make this more generalized
     creator = get_creator("caedfc88-588e-444f-953a-8141066b9577")
@@ -43,6 +43,11 @@ def create_tool(analysis, output_definitions):
 
     analysis_output_definitions = output_definitions[analysis_info[1]]
     print(analysis_output_definitions)
+
+    # Check if any input definitions should be chained from other analyses
+    analysis_input_definitions = []
+    if analysis_info[1] in input_definitions:
+        analysis_input_definitions = input_definitions[analysis_info[1]]
 
     spec = incore_analysis.get_spec()
     # response = requests.get("http://localhost:8888/datawolf/workflowtools")
@@ -91,7 +96,7 @@ def create_tool(analysis, output_definitions):
             param_arg = "NUMBER"
         elif param_type == bool:
             param_arg = "BOOLEAN"
-        # START HERE
+
         analysis_param = create_workflow_tool_parameter(param_id, input_param["description"], not input_param[
             'required'], param_arg, False, "")
         tool_parameters.append(analysis_param)
@@ -102,12 +107,24 @@ def create_tool(analysis, output_definitions):
     analysis_inputs = spec["input_datasets"]
     for analysis_input in analysis_inputs:
         param_id = analysis_input["id"]
-        analysis_param = create_workflow_tool_parameter(param_id, analysis_input["description"],
-                                                        not analysis_input['required'], "STRING", False, "")
-        tool_parameters.append(analysis_param)
-        flag = "--" + param_id
-        cl_option = create_command_line_option("PARAMETER", "", flag, analysis_param["parameterId"], "", "", True)
-        command_line_options.append(cl_option)
+
+        # Any inputs not listed in the analysis input definition will be loaded from the service by ID
+        if param_id not in analysis_input_definitions:
+            analysis_param = create_workflow_tool_parameter(param_id, analysis_input["description"],
+                                                            not analysis_input['required'], "STRING", False, "")
+            tool_parameters.append(analysis_param)
+            flag = "--" + param_id
+            cl_option = create_command_line_option("PARAMETER", "", flag, analysis_param["parameterId"], "", "", True)
+            command_line_options.append(cl_option)
+        else:
+            # Inputs listed in the analysis input definition should be chained and will be passed in as files
+            # TODO make this more generalized
+            analysis_input_param = create_workflow_tool_data(param_id, analysis_input["description"], "text/csv")
+            tool_inputs.append(analysis_input_param)
+            flag = "--" + param_id
+            cl_option = create_command_line_option("DATA", "", flag, analysis_input_param["dataId"], "INPUT",
+                                                   "", True)
+            command_line_options.append(cl_option)
 
     stdout = create_workflow_tool_data("stdout", "stdout of external tool", "text/plain")
     stdout["dataId"] = "stdout"
@@ -134,6 +151,7 @@ def create_tool(analysis, output_definitions):
     zip_file = zipfile.ZipFile("new-tool.zip", "w")
     tool_blobs.append(add_blobs(zip_file, "dw_pyincore.py", "text/x-python", True))
     tool_blobs.append(add_blobs(zip_file, "run.sh", "application/x-shellscript", True))
+    tool_blobs.append(add_blobs(zip_file, "input_definition.json", "application/json", True))
 
     tool["implementation"] = json.dumps(command_line_impl).replace('"', '\"')
     tool["inputs"] = tool_inputs
@@ -147,9 +165,17 @@ def create_tool(analysis, output_definitions):
     add_blobs(zip_file, "tool.json", "", False)
     
     zip_file.close()
+    upload_tool(zip_file.filename)
 
 
-# def upload_tool(zip_tool):
+def upload_tool(zip_tool):
+    with open(zip_tool, "rb") as file:
+        files = {"tool": file}
+        response = requests.post("http://localhost:8888/datawolf/workflowtools", files=files)
+        if response.ok:
+            print("uploaded tool")
+        else:
+            print("error creating tool")
 
 
 def add_blobs(zip_file, filename, mime_type, isBlob):
@@ -259,13 +285,15 @@ if __name__ == '__main__':
 
     # Hack to inform datawolf of how to collect the analysis outputs, this should come from somewhere else
     output_def_file = open("output_definition.json")
-
     analysis_output = json.load(output_def_file)
+
+    # Read list of analysis inputs that should chain
+    input_def_file = open("input_definition.json")
+    analysis_input = json.load(input_def_file)
 
     print(analysis_output)
     for cls in BaseAnalysis.__subclasses__():
-        create_tool(cls, analysis_output)
-
+        create_tool(cls, analysis_input, analysis_output)
     # Next steps are to:
     # 1. Finish auto creation of the tool through the datawolf endpoint, currently only tested by manually posting
     # the zip generated
