@@ -1,6 +1,8 @@
 {
+   "BuildingFunctionality": ["building_damage_mcs_samples", "substations_damage_mcs_samples", "poles_damage_mcs_samples"],
+   "CapitalShocks": ["failure_probability"],
+   "JoplinCGEModel": ["sector_shocks"],
    "MonteCarloFailureProbability" : ["damage"],
    "MeanDamage": ["damage"],
-   "JoplinCGEModel": ["sector_shocks"],
-   "CapitalShocks": ["failure_probability"]
+   "PopulationDislocation": ["building_dmg", "housing_unit_allocation"]
 }

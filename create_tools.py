@@ -52,7 +52,7 @@ def create_tool(analysis, input_definitions, output_definitions):
     spec = incore_analysis.get_spec()
     # response = requests.get("http://localhost:8888/datawolf/workflowtools")
     # print(response.text)
-    tool = create_workflow_tool(spec["name"], spec["description"], "1.0", "commandline", creator)
+    tool = create_workflow_tool(analysis_info[1], spec["description"], "1.0", "commandline", creator)
     tool_inputs = []
     tool_outputs = []
     tool_blobs = []
@@ -138,7 +138,11 @@ def create_tool(analysis, input_definitions, output_definitions):
         mime_type = analysis_output_info["mimeType"]
         filename = analysis_output_info["filename"]
 
-        output = create_workflow_tool_data(output_id, analysis_output["description"], mime_type)
+        description = ""
+        if "description" in analysis_output:
+            description = analysis_output["description"]
+
+        output = create_workflow_tool_data(output_id, description, mime_type)
         tool_outputs.append(output)
 
         cl_option = create_command_line_option("DATA", "", "", output["dataId"], "OUTPUT", filename, True)
@@ -257,7 +261,7 @@ def create_workflow_tool_parameter(title, description, allowNull, type, hidden, 
     wf_param["id"] = str(uuid.uuid4())
     wf_param["parameterId"] = str(uuid.uuid4())
     wf_param["title"] = title
-    wf_param["description"] = title
+    wf_param["description"] = description
     wf_param["type"] = type
     wf_param["hidden"] = hidden
     wf_param["allowNull"] = allowNull

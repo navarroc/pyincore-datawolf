@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
-from os import path
 import argparse
 from pyincore import IncoreClient, DataService
+import zipfile
 
 
 def main():
@@ -23,35 +23,49 @@ def main():
     title = args.result_name
     local_file = args.output_dataset
     data_type = args.output_type
-    format = args.output_format
+    output_format = args.output_format
 
     # TODO perhaps from semantic service we can get the actual file type, for now assume CSV
     # Another alternative will be to store file types is a JSON file that says the type
-    base_file = os.path.splitext(local_file)[0]
-    os.rename(local_file, base_file + ".csv")
+    if output_format == "table":
+        base_file = os.path.splitext(local_file)[0]
+        os.rename(local_file, base_file + ".csv")
+        store_results(dataservice, source_id, title, base_file + ".csv", data_type, output_format)
+    elif output_format == "shapefile":
+        base_file = os.path.splitext(local_file)[0]
+        os.rename(local_file, base_file + ".zip")
+        with zipfile.ZipFile(base_file + ".zip", "r") as zip_file_ref:
+            zip_file_ref.extractall(".")
 
-    store_results(dataservice, source_id, title, base_file + ".csv", data_type, format)
+        shp_file = None
+        # Find shapefile in the zip
+        for file in os.listdir("."):
+            if file.endswith(".shp"):
+                shp_file = file
+
+        store_results(dataservice, source_id, title, shp_file, data_type, output_format)
 
 
-def store_results(dataservice, source_id, title, local_file, data_type, format):
-    output_properties = {"dataType": data_type, "title": title + "- test", "format": format, "sourceDataset": source_id}
+def store_results(dataservice, source_id, title, local_file, data_type, output_format):
+    output_properties = {"dataType": data_type, "title": title + "- test", "format": output_format,
+                         "sourceDataset": source_id}
 
-    if format == "shapefile":
+    if output_format == "shapefile":
         files = []
         file_name = os.path.splitext(local_file)[0]
+        print("Looking for shapefiles matching on: "+file_name)
         for shp_file in os.listdir("."):
             if shp_file.startswith(file_name):
                 files.append(os.path.join(".", shp_file))
     else:
         files = [str(os.path.join(".", local_file))]
 
-    print("does file exist?")
-    print(path.exists(os.path.join(".", local_file)))
+    # print("does file exist?")
+    # print(path.exists(os.path.join(".", local_file)))
 
     dataset_id = "temp-id"
-
-    save_to_service = True
     # Use this for testing locally
+    save_to_service = True
     if save_to_service:
         response = dataservice.create_dataset(output_properties)
         dataset_id = response['id']
