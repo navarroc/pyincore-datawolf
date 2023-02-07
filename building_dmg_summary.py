@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import os
-from pathlib import Path
 from pyincore import Dataset, IncoreClient, DataService
 from pyincore.utils.dataprocessutil import DataProcessUtil
 import json
 import pandas as pd
-import geopandas as gpd
 
 
 def main():
-
     # IN-CORE token (optional)
     token = args.token
 
@@ -23,14 +19,13 @@ def main():
     # Data Service
     dataservice = DataService(client)
 
+    # Building dataset ID
     building_dataset_id = args.buildings
 
-    inventory_path = str(Path.home()) + "/.incore/cache_data/" + building_dataset_id
-    for invfile in os.listdir(inventory_path):
-        if invfile.endswith(".zip"):
-            inventory_path = os.path.join(inventory_path, invfile)
-    buildings = pd.DataFrame(gpd.read_file("zip://" + inventory_path))
+    bldg_dataset = Dataset.from_data_service(building_dataset_id, dataservice)
+    buildings = bldg_dataset.get_dataframe_from_shapefile()
 
+    # Archetype mapping
     archetype_mapping = args.archetype_mapping
 
     archetype_mapping_dataset = Dataset.from_data_service(archetype_mapping, dataservice)
@@ -38,8 +33,16 @@ def main():
     arch_mapping = pd.read_csv(archetype_mapping_path)
 
     max_dmg_state_df = pd.read_csv(args.max_dmg_state)
+    groupby_column = "max_state"
+    if args.groupby_col is not None and len(args.groupby_col) > 0:
+        groupby_column = args.groupby_col
 
-    ret_json = DataProcessUtil.create_mapped_dmg_result(buildings, max_dmg_state_df, arch_mapping)
+    arch_column = "archetype"
+    if args.arch_col is not None and len(args.arch_col) > 0:
+        arch_column = args.arch_col
+
+    ret_json = DataProcessUtil.create_mapped_dmg_result(buildings, max_dmg_state_df, arch_mapping, groupby_column,
+                                                        arch_column)
 
     with open(args.result_name + "-bldg-dmg-summary.json", 'w') as csv_file:
         json.dump(ret_json, csv_file)
@@ -54,6 +57,8 @@ if __name__ == '__main__':
     parser.add_argument('--buildings', dest='buildings', help='Building Inventory')
     parser.add_argument('--max_dmg_state', dest='max_dmg_state', help='Building Max Damage State')
     parser.add_argument('--archetype_mapping', dest='archetype_mapping', help='Archetype Mapping')
+    parser.add_argument('--groupby_col', dest='groupby_col', help='Column to create groups')
+    parser.add_argument('--arch_col', dest='arch_col', help='Column to match on')
 
     args = parser.parse_args()
     main()

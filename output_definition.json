@@ -38,5 +38,12 @@
    },
    "PopulationDislocation":{
       "result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   },
+   "HousingRecoverySequential": {
+      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   },
+   "SocialVulnerability": {
+      "sv_result": { "mimeType" : "text/csv", "filename": "*.csv"}
    }
+
 }

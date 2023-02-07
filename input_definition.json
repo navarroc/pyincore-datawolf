@@ -4,5 +4,7 @@
    "JoplinCGEModel": ["sector_shocks"],
    "MonteCarloFailureProbability" : ["damage"],
    "MeanDamage": ["damage"],
-   "PopulationDislocation": ["building_dmg", "housing_unit_allocation"]
+   "PopulationDislocation": ["building_dmg"],
+   "HousingRecoverySequential": ["sv_result", "population_dislocation_block"],
+   "SaltLakeCGEModel": ["sector_shocks"]
 }

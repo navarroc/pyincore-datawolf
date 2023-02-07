@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-import os
-from pathlib import Path
 import argparse
 from pyincore import Dataset, IncoreClient, DataService
 from pyincore.utils.dataprocessutil import DataProcessUtil
 import json
 import pandas as pd
-import geopandas as gpd
 
 
 def main():
@@ -22,22 +19,23 @@ def main():
     # Data Service
     dataservice = DataService(client)
 
+    # Archetype mapping file
     archetype_mapping = args.archetype_mapping
     archetype_mapping_dataset = Dataset.from_data_service(archetype_mapping, dataservice)
     archetype_mapping_path = archetype_mapping_dataset.get_file_path()
     arch_mapping = pd.read_csv(archetype_mapping_path)
 
+    # Building failure probability
     failure_probability = args.failure_probability
+
+    # Building dataset id
     building_dataset_id = args.buildings
 
-    inventory_path = str(Path.home()) + "/.incore/cache_data/" + building_dataset_id
-    for invfile in os.listdir(inventory_path):
-        if invfile.endswith(".zip"):
-            inventory_path = os.path.join(inventory_path, invfile)
+    bldg_dataset = Dataset.from_data_service(building_dataset_id, dataservice)
+    buildings = bldg_dataset.get_dataframe_from_shapefile()
 
-    buildings = pd.DataFrame(gpd.read_file("zip://" + inventory_path))
-
-    # Cluster the mcs building failure probability
+    # Cluster the mcs building failure probability - essentially building functionality without electric power being
+    # considered
     bldg_dmg_df = pd.read_csv(failure_probability, usecols=['guid', 'failure_probability'])
     for index, row in bldg_dmg_df.iterrows():
         bldg_dmg_df['probability'] = 1.0 - bldg_dmg_df.failure_probability
@@ -45,7 +43,11 @@ def main():
     bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
                        columns=['guid', 'probability'], index=False)
 
-    ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping)
+    arch_column = "archetype"
+    if args.arch_col is not None and len(args.arch_col) > 0:
+        arch_column = args.arch_col
+
+    ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping, arch_column)
     
     with open(args.result_name + "_mcs_building_failure_probability_cluster.json", "w") as f:
         json.dump(ret_json, f, indent=2)
@@ -61,6 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('--failure_probability', dest='failure_probability',
                         help='MCS Building Failure Probability')
     parser.add_argument('--archetype_mapping', dest='archetype_mapping', help='Archetype Mapping')
+    parser.add_argument('--arch_col', dest='arch_col', help='Column to match on')
 
     args = parser.parse_args()
     main()
