@@ -1,0 +1,10 @@
+name: pyincore
+channels:
+  - conda-forge
+  - in-core
+  - in-core/label/rc
+dependencies:
+  - python=3.8
+  - pyincore=1.9.0
+  - geopandas
+
