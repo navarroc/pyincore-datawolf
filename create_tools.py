@@ -1,8 +1,19 @@
 import importlib
 import pkgutil
-import pyincore.analyses
+# import pyincore.analyses
 # TODO Remove import this after testing
-import pyincore.analyses.bridgedamage
+# import pyincore.analyses.combinedwindwavesurgebuildingdamage.combinedwindwavesurgebuildingdamage
+# import pyincore.analyses.housingrecoverysequential.housingrecoverysequential
+# import pyincore.analyses.socialvulnerability.socialvulnerability
+import pyincore.analyses.epfdamage
+# import pyincore.analyses.buildingfunctionality
+# import pyincore.analyses.populationdislocation.populationdislocation
+# import pyincore.analyses.saltlakecge.saltlakecge
+# import pyincore.analyses.galvestoncge.galvestoncge
+#import pyincore.analyses.joplincge
+#import pyincore.analyses.capitalshocks
+#import pyincore.analyses.housingunitallocation
+# import pyincore.analyses.montecarlofailureprobability
 from pyincore import BaseAnalysis, IncoreClient
 import json
 import requests
@@ -10,6 +21,12 @@ import os
 import zipfile
 import uuid
 from datetime import datetime
+
+datawolf_host = "http://localhost:8889"
+my_person_id = "e82424a3-696b-4217-acf1-55631e4d957f"
+
+# For now, use this to specify whether a tool should be a command line or kubernetes tool
+kube_tool = False
 
 
 def import_submodules(package, recursive=True):
@@ -34,7 +51,7 @@ def import_submodules(package, recursive=True):
 def create_tool(analysis, input_definitions, output_definitions):
 
     # TODO make this more generalized
-    creator = get_creator("caedfc88-588e-444f-953a-8141066b9577")
+    creator = get_creator(my_person_id)
 
     incore_analysis = analysis(IncoreClient())
     print("find module path")
@@ -52,7 +69,11 @@ def create_tool(analysis, input_definitions, output_definitions):
     spec = incore_analysis.get_spec()
     # response = requests.get("http://localhost:8888/datawolf/workflowtools")
     # print(response.text)
-    tool = create_workflow_tool(analysis_info[1], spec["description"], "1.0", "commandline", creator)
+    tool = {}
+    if not kube_tool:
+        tool = create_workflow_tool(analysis_info[1], spec["description"], "1.0", "commandline", creator)
+    else:
+        tool = create_workflow_tool(analysis_info[1], spec["description"], "1.0", "kubernetes", creator)
     tool_inputs = []
     tool_outputs = []
     tool_blobs = []
@@ -148,14 +169,20 @@ def create_tool(analysis, input_definitions, output_definitions):
         cl_option = create_command_line_option("DATA", "", "", output["dataId"], "OUTPUT", filename, True)
         command_line_options.append(cl_option)
 
-    command_line_impl = create_command_line_tool()
+    if not kube_tool:
+        command_line_impl = create_command_line_tool()
+    else:
+        command_line_impl = create_kubernetes_tool()
+
     command_line_impl["captureStdOut"] = stdout["dataId"]
     command_line_impl["commandLineOptions"] = command_line_options
 
     zip_file = zipfile.ZipFile("new-tool.zip", "w")
-    tool_blobs.append(add_blobs(zip_file, "dw_pyincore.py", "text/x-python", True))
-    tool_blobs.append(add_blobs(zip_file, "run.sh", "application/x-shellscript", True))
-    tool_blobs.append(add_blobs(zip_file, "input_definition.json", "application/json", True))
+
+    if not kube_tool:
+        tool_blobs.append(add_blobs(zip_file, "dw_pyincore.py", "text/x-python", True))
+        tool_blobs.append(add_blobs(zip_file, "run.sh", "application/x-shellscript", True))
+        tool_blobs.append(add_blobs(zip_file, "input_definition.json", "application/json", True))
 
     tool["implementation"] = json.dumps(command_line_impl).replace('"', '\"')
     tool["inputs"] = tool_inputs
@@ -175,7 +202,7 @@ def create_tool(analysis, input_definitions, output_definitions):
 def upload_tool(zip_tool):
     with open(zip_tool, "rb") as file:
         files = {"tool": file}
-        response = requests.post("http://localhost:8888/datawolf/workflowtools", files=files)
+        response = requests.post(datawolf_host + "/datawolf/workflowtools", files=files)
         if response.ok:
             print("uploaded tool")
         else:
@@ -235,6 +262,18 @@ def create_command_line_tool():
 
     return command_line_impl
 
+def create_kubernetes_tool():
+    command_line_impl = {}
+    command_line_impl["commandLineOptions"] = []
+    command_line_impl["env"] = {}
+    command_line_impl["resources"] = {"cpu": 16, "memory": 12}
+    command_line_impl["pullSecretName"] = "regcred"
+    command_line_impl["captureStdOut"] = None
+    command_line_impl["captureStdErr"] = None
+    command_line_impl["joinStdOutStdErr"] = False
+    command_line_impl["image"] = "hub.ncsa.illinois.edu/incore/dw-pyincore"
+
+    return command_line_impl
 
 def create_command_line_option(type, value, flag, option_id, input_output, filename, commandline):
     cl_option = {}
@@ -257,11 +296,13 @@ def create_command_line_option(type, value, flag, option_id, input_output, filen
 
 
 def create_workflow_tool_parameter(title, description, allowNull, type, hidden, value):
+    print("description length: ")
+    print(len(description))
     wf_param = {}
     wf_param["id"] = str(uuid.uuid4())
     wf_param["parameterId"] = str(uuid.uuid4())
     wf_param["title"] = title
-    wf_param["description"] = description
+    wf_param["description"] = title
     wf_param["type"] = type
     wf_param["hidden"] = hidden
     wf_param["allowNull"] = allowNull
@@ -271,7 +312,8 @@ def create_workflow_tool_parameter(title, description, allowNull, type, hidden, 
 
 
 def get_creator(person_id):
-    response = requests.get("http://localhost:8888/datawolf/persons/"+person_id)
+    #response = requests.get("http://192.168.1.36:8888/datawolf/persons/"+person_id)
+    response = requests.get(datawolf_host + "/datawolf/persons/"+person_id)
     return response.json()
 
 
@@ -284,7 +326,8 @@ def get_analysis_info(obj):
 
 if __name__ == '__main__':
     # TODO replace this with pyincore.analyses when done testing
-    import_submodules(pyincore.analyses.bridgedamage)
+    #import_submodules(pyincore.analyses.buildingdamage)
+    print("these are the subclasses")
     print([cls.__name__ for cls in BaseAnalysis.__subclasses__()])
 
     # Hack to inform datawolf of how to collect the analysis outputs, this should come from somewhere else

@@ -1,10 +1,12 @@
 {
-   "BuildingFunctionality": ["building_damage_mcs_samples", "substations_damage_mcs_samples", "poles_damage_mcs_samples"],
+   "CombinedWindWaveSurgeBuildingDamage":["wind_damage", "surge_wave_damage", "flood_damage"],
+   "BuildingFunctionality": ["building_damage_mcs_samples", "poles_damage_mcs_samples"],
    "CapitalShocks": ["failure_probability"],
    "JoplinCGEModel": ["sector_shocks"],
    "MonteCarloFailureProbability" : ["damage"],
    "MeanDamage": ["damage"],
    "PopulationDislocation": ["building_dmg"],
    "HousingRecoverySequential": ["sv_result", "population_dislocation_block"],
-   "SaltLakeCGEModel": ["sector_shocks"]
+   "SaltLakeCGEModel": ["sector_shocks"],
+   "GalvestonCGEModel": ["sector_shocks"]
 }

@@ -3,6 +3,10 @@
       "ds_result": { "mimeType" : "text/csv", "filename": "*.csv"},
       "damage_result": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
    },
+   "CombinedWindWaveSurgeBuildingDamage":{
+      "ds_result": { "mimeType" : "text/csv", "filename": "*_combined_dmg.csv"},
+      "result": {"mimeType" : "text/csv", "filename": "*_max_state.csv"}
+   },
    "BuildingFunctionality": {
       "functionality_samples": { "mimeType" : "text/csv", "filename": "*_functionality_samples.csv"},
       "functionality_probability": {"mimeType" : "text/csv", "filename": "*_functionality_probability.csv"}
@@ -22,6 +26,20 @@
       "result": { "mimeType" : "text/csv", "filename": "*.csv"}
    },
    "JoplinCGEModel":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
+   },
+   "SaltLakeCGEModel":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
+   },
+   "GalvestonCGEModel":{
       "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
       "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
       "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
