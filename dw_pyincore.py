@@ -3,6 +3,7 @@
 """ DataWolf wrapper for pyincore analyses
 """
 import importlib
+import os
 from pyincore import IncoreClient, FragilityService, MappingSet, Dataset
 import argparse
 import datetime
@@ -55,6 +56,14 @@ def main(cl_args):
     py_analysis.run_analysis()
 
     print(analysis_name + " completed", datetime.datetime.now())
+
+    # Handles the case where combined dmg analysis doesn't give a name for datawolf to find the dataset
+    # TODO remove after pyincore is fixed
+    if analysis_name == "CombinedWindWaveSurgeBuildingDamage":
+        result_name = args_dict["result_name"]
+        old_filename = result_name + ".csv"
+        new_filename = result_name + "_max_state.csv"
+        os.rename(old_filename, new_filename)
 
 
 def set_analysis_inputs(analysis, fragility_service, args, analysis_input_definitions):
@@ -126,7 +135,8 @@ if __name__ == '__main__':
     for val in unknown:
         if val.startswith("--"):
             if key is not None:
-                if len(values.split()) > 1:
+                # Hack for fragility keys, which can contain spaces, in which case we don't want to split the string
+                if len(values.split()) > 1 and key != "fragility_key":
                     values = values.split()
                 else:
                     values = values.strip()
