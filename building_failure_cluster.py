@@ -37,8 +37,7 @@ def main():
     # Cluster the mcs building failure probability - essentially building functionality without electric power being
     # considered
     bldg_dmg_df = pd.read_csv(failure_probability, usecols=['guid', 'failure_probability'])
-    for index, row in bldg_dmg_df.iterrows():
-        bldg_dmg_df['probability'] = 1.0 - bldg_dmg_df.failure_probability
+    bldg_dmg_df['probability'] = bldg_dmg_df.apply(lambda x: 1.0 - x['failure_probability'], axis=1)
 
     bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
                        columns=['guid', 'probability'], index=False)
