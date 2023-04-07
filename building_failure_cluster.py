@@ -36,17 +36,13 @@ def main():
 
     # Cluster the mcs building failure probability - essentially building functionality without electric power being
     # considered
-    bldg_dmg_df = pd.read_csv(failure_probability, usecols=['guid', 'failure_probability'])
-    bldg_dmg_df['probability'] = bldg_dmg_df.apply(lambda x: 1.0 - x['failure_probability'], axis=1)
-
-    bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
-                       columns=['guid', 'probability'], index=False)
+    fail_state_df = pd.read_csv(failure_probability, usecols=['guid', 'failure'])
 
     arch_column = "archetype"
     if args.arch_col is not None and len(args.arch_col) > 0:
         arch_column = args.arch_col
 
-    ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping, arch_column)
+    ret_json = DataProcessUtil.create_mapped_func_result(buildings, fail_state_df, arch_mapping, arch_column)
     
     with open(args.result_name + "_mcs_building_failure_probability_cluster.json", "w") as f:
         json.dump(ret_json, f, indent=2)
