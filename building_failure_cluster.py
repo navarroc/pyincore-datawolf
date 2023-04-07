@@ -4,6 +4,7 @@ from pyincore import Dataset, IncoreClient, DataService
 from pyincore.utils.dataprocessutil import DataProcessUtil
 import json
 import pandas as pd
+from statistics import mean
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     arch_mapping = pd.read_csv(archetype_mapping_path)
 
     # Building failure probability
-    failure_probability = args.failure_probability
+    failure_state = args.failure_probability
 
     # Building dataset id
     building_dataset_id = args.buildings
@@ -36,7 +37,13 @@ def main():
 
     # Cluster the mcs building failure probability - essentially building functionality without electric power being
     # considered
-    fail_state_df = pd.read_csv(failure_probability, usecols=['guid', 'failure'])
+    fail_state_df = pd.read_csv(failure_state, usecols=['guid', 'failure'])
+
+    # I think you need this for the map layer? work around would be calculate this on the fly
+    fail_state_df['probability'] = \
+        fail_state_df["failure"].apply(lambda x: [int(x) for x in x.split(",")]).apply(lambda x: 1 - mean(x))
+    fail_state_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
+                       columns=['guid', 'probability'], index=False)
 
     arch_column = "archetype"
     if args.arch_col is not None and len(args.arch_col) > 0:
