@@ -1,0 +1,16 @@
+{
+   "BridgeDamage":["dfr3_mapping_set"],
+   "BuildingStructuralDamage": ["dfr3_mapping_set"],
+   "BuildingNonStructDamage": ["dfr3_mapping_set"],
+   "CommercialBuildingRecovery": ["dfr3_mapping_set"],
+   "EpfDamage": ["dfr3_mapping_set"],
+   "EpfRestoration": ["dfr3_mapping_set"],
+   "GasFacilityDamage": ["dfr3_mapping_set"],
+   "PipelineDamage": ["dfr3_mapping_set"],
+   "PipelineDamageRepairRate": ["dfr3_mapping_set"],
+   "PipelineRestoration": ["dfr3_mapping_set"],
+   "ResidentialBuildingRecovery": ["dfr3_mapping_set"],
+   "RoadDamage": ["dfr3_mapping_set"],
+   "WaterFacilityDamage": ["dfr3_mapping_set"],
+   "WaterFacilityRestoration": ["dfr3_mapping_set"]
+}

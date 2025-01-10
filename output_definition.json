@@ -1,67 +1,208 @@
 {
-   "BuildingDamage":{
-      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv"},
-      "damage_result": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+   "BridgeDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
    },
-   "CombinedWindWaveSurgeBuildingDamage":{
-      "ds_result": { "mimeType" : "text/csv", "filename": "*_combined_dmg.csv"},
-      "result": {"mimeType" : "text/csv", "filename": "*_max_state.csv"}
+   "BuildingClusterRecovery":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "BuildingEconLoss":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
    },
    "BuildingFunctionality": {
-      "functionality_samples": { "mimeType" : "text/csv", "filename": "*_functionality_samples.csv"},
-      "functionality_probability": {"mimeType" : "text/csv", "filename": "*_functionality_probability.csv"}
+      "functionality_samples": { "mimeType" : "text/csv", "filename": "*_functionality_samples.csv", "format": "table" },
+      "functionality_probability": {"mimeType" : "text/csv", "filename": "*_functionality_probability.csv", "format": "table"}
    },
-   "BridgeDamage":{
-      "result": { "mimeType" : "text/csv", "filename": "*.csv"},
-      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+   "BuildingNonStructDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "damage_result": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "BuildingStructuralDamage":{
+      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "damage_result": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "BuyoutDecision":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
    },
    "CapitalShocks":{
-      "sector_shocks": { "mimeType" : "text/csv", "filename": "*.csv"}
+      "sector_shocks": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "CombinedWindWaveSurgeBuildingDamage":{
+      "ds_result": { "mimeType" : "text/csv", "filename": "*_combined_dmg.csv", "format": "table"},
+      "result": {"mimeType" : "text/csv", "filename": "*_max_state.csv", "format": "table"}
+   },
+   "CombinedWindWaveSurgeBuildingLoss":{
+      "result": {"mimeType" : "text/csv", "filename": "*_loss.csv", "format": "table"}
+   },
+   "CommercialBuildingRecovery":{
+      "total_delay": { "mimeType" : "text/csv", "filename": "*_delay.csv", "format": "table"},
+      "recovery": { "mimeType" : "text/csv", "filename": "*_recovery_time.csv", "format": "table"},
+      "time_stepping_recovery": { "mimeType" : "text/csv", "filename": "*_time_stepping_recovery.csv", "format": "table"}
+   },
+   "CumulativeBuildingDamage":{
+      "combined-result": {"mimeType" : "text/csv", "filename": "*_loss.csv", "format": "table"}
    },
    "EpfDamage": {
-      "result": { "mimeType" : "text/csv", "filename": "*.csv"},
-      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json"}
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
    },
-   "HousingUnitAllocation":{
-      "result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   "EpfRepairCost": {
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
    },
-   "JoplinCGEModel":{
-      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
-      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
-      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
-      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
-      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
+   "EpfRestoration": {
+      "inventory_restoration_map": { "mimeType" : "text/csv", "filename": "inventory_restoration_map_*.csv", "format":
+      "table"},
+      "pf_results": { "mimeType" : "text/csv", "filename": "percentage_of_functionality_*.csv", "format": "table"},
+      "time_results": { "mimeType" : "text/csv", "filename": "reptime_*.csv", "format": "table"},
+      "func_results": { "mimeType" : "text/csv", "filename": "*_discretized_restoration.csv", "format": "table"},
+      "repair_times": { "mimeType" : "text/csv", "filename": "full_reptime_*.csv", "format": "table"}
    },
-   "SaltLakeCGEModel":{
-      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
-      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
-      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
-      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
-      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
+   "EpnFunctionality": {
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"}
+   },
+   "EquityMetric": {
+      "equity_metric": { "mimeType" : "text/csv", "filename": "*_equity_metric.csv", "format": "table"}
    },
    "GalvestonCGEModel":{
-      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv"},
-      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv"},
-      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv"},
-      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv"},
-      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv"}
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
    },
-   "MeanDamage":{
-      "result": { "mimeType" : "text/csv", "filename": "*.csv"}
-   },
-   "MonteCarloFailureProbability":{
-      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv"},
-      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv"},
-      "sample_damage_states": { "mimeType" : "text/csv", "filename": "*_sample_damage_states.csv"}
-   },
-   "PopulationDislocation":{
-      "result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   "GasFacilityDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
    },
    "HousingRecoverySequential": {
-      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv"}
+      "ds_result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
    },
-   "SocialVulnerability": {
-      "sv_result": { "mimeType" : "text/csv", "filename": "*.csv"}
+   "HousingUnitAllocation":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "HousingValuationRecovery":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "INDP": {
+      "action": { "mimeType" : "text/csv", "filename": "*actions.csv", "format": "table"},
+      "cost": { "mimeType" : "text/csv", "filename": "*costs.csv", "format": "table"},
+      "runtime": { "mimeType" : "text/csv", "filename": "*run_time.csv", "format": "table"}
+   },
+   "JoplinEmpiricalBuildingRestoration":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "JoplinCGEModel":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MeanDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "MlEnabledCgeSlc":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MlEnabledCgeJoplin":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MonteCarloFailureProbability":{
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"},
+      "sample_damage_states": { "mimeType" : "text/csv", "filename": "*_sample_damage_states.csv", "format": "table"}
+   },
+   "MonteCarloLimitStateProbability":{
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"},
+      "sample_damage_states": { "mimeType" : "text/csv", "filename": "*_sample_damage_states.csv", "format": "table"}
+   },
+   "MultiObjectiveRetrofitOptimization":{
+      "optimal_solution_dv_x": { "mimeType" : "text/csv", "filename": "optimal_solution_dv_x*.csv", "format": "table"},
+      "optimal_solution_dv_y": { "mimeType" : "text/csv", "filename": "optimal_solution_dv_y*.csv", "format": "table"}
+   },
+   "NciFunctionality":{
+      "epf_cascading_functionality": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "PipelineDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "PipelineDamageRepairRate":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "PipelineFunctionality":{
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"}
+   },
+   "PipelineRepairCost":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "PipelineRestoration":{
+      "pipeline_restoration": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "PopulationDislocation":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "ResidentialBuildingRecovery":{
+      "total_delay": { "mimeType" : "text/csv", "filename": "*_delay.csv", "format": "table"},
+      "recovery": { "mimeType" : "text/csv", "filename": "*_recovery_time.csv", "format": "table"},
+      "time_stepping_recovery": { "mimeType" : "text/csv", "filename": "*_time_stepping_recovery.csv", "format": "table"}
+   },
+   "RoadDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "SaltLakeCGEModel":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "SeasideCGEModel":{
+      "Seaside_Sims": { "mimeType" : "text/csv", "filename": "*Seaside_Sims.csv", "format": "table"},
+      "Seaside_output": { "mimeType" : "text/csv", "filename": "*Seaside_output.csv", "format": "table"}
+   },
+   "SocialVulnerabilityScore": {
+      "sv_result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "TornadoEpnDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "TrafficFlowRecovery":{
+      "optimal_solution_of_bridge_repair_schedule": { "mimeType" : "text/csv", "filename": "*optimal_solution_of_bridge_repair_schedule.csv", "format": "table"},
+      "overall_traffic_flow_recovery_trajectory": {"mimeType" : "text/csv", "filename": "*overall_traffic_flow_recovery_trajectory.csvS",
+         "format": "json"}
+   },
+   "WaterFacilityDamage":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
+      "metadata": {"mimeType" : "application/json", "filename": "*_additional_info.json", "format": "json"}
+   },
+   "WaterFacilityRepairCost":{
+      "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"}
+   },
+   "WaterFacilityRestoration":{
+      "inventory_restoration_map": { "mimeType" : "text/csv", "filename": "inventory_restoration_map_*.csv", "format":
+      "table"},
+      "pf_results": { "mimeType" : "text/csv", "filename": "percentage_of_functionality_*.csv", "format": "table"},
+      "time_results": { "mimeType" : "text/csv", "filename": "reptime_*.csv", "format": "table"},
+      "func_results": { "mimeType" : "text/csv", "filename": "*_discretized_restoration.csv", "format": "table"},
+      "repair_times": { "mimeType" : "text/csv", "filename": "full_reptime_*.csv", "format": "table"}
+   },
+   "WfnFunctionality":{
+      "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
+      "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"}
    }
-
 }
