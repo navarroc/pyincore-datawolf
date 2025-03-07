@@ -2,22 +2,36 @@ import importlib
 import pkgutil
 import pyincore.analyses
 from pyincore import BaseAnalysis, IncoreClient
+from pyincore import globals as pyglobals
 from pyincore.analyses.core_cge_ml import CoreCGEML
 import json
 import requests
 import os
 import zipfile
 import uuid
+import hashlib
 from datetime import datetime
 
 datawolf_host = "http://localhost:8888"
-#datawolf_host = "https://test.in-core.org"
-# datawolf_host = "https://dev.in-core.org"
+# datawolf_host = pyglobals.INCORE_API_DEV_URL
 my_person_id = ""
 
 # For now, use this to specify whether a tool should be a command line or kubernetes tool
 kube_tool = False
-headers = {'Authorization' : 'Bearer some-token'}
+
+def get_token():
+    token_file_name = "." + hashlib.sha256(str.encode(datawolf_host)).hexdigest() + "_token"
+    token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
+    headers = {'Authorization': 'Bearer some-token'}
+
+    if (os.path.exists(token_file)):
+        with open(token_file, "r") as f:
+            auth = f.read().splitlines()
+
+        headers = {'Authorization' : auth[0]}
+
+    return headers
+
 
 def import_submodules(package, recursive=True):
     """ Import all submodules of a module, recursively, including subpackages
@@ -38,10 +52,10 @@ def import_submodules(package, recursive=True):
     return results
 
 
-def create_tool(analysis, input_definitions, output_definitions):
+def create_tool(analysis, input_definitions, output_definitions, headers):
 
     # TODO make this more generalized
-    creator = get_creator(my_person_id)
+    creator = get_creator(my_person_id, headers)
 
     incore_analysis = analysis(IncoreClient())
     # print("find module path")
@@ -177,10 +191,10 @@ def create_tool(analysis, input_definitions, output_definitions):
     add_blobs(zip_file, "tool.json", "", False)
     
     zip_file.close()
-    upload_tool(zip_file.filename)
+    upload_tool(zip_file.filename, headers)
 
 
-def upload_tool(zip_tool):
+def upload_tool(zip_tool, headers):
     print("upload a tool")
     with open(zip_tool, "rb") as file:
         files = {"tool": file}
@@ -296,7 +310,7 @@ def create_workflow_tool_parameter(title, description, allowNull, type, hidden, 
     return wf_param
 
 
-def get_creator(person_id):
+def get_creator(person_id, headers):
     #response = requests.get("http://192.168.1.36:8888/datawolf/persons/"+person_id)
     response = requests.get(datawolf_host + "/datawolf/persons/"+person_id, headers=headers)
     return response.json()
@@ -317,6 +331,10 @@ if __name__ == '__main__':
     print([cls.__name__ for cls in BaseAnalysis.__subclasses__()])
     print([cls.__name__ for cls in CoreCGEML.__subclasses__()])
 
+    # Gets the IN-CORE token for the IN-CORE host specified
+    auth_headers = get_token()
+    print(auth_headers)
+
     # Hack to inform datawolf of how to collect the analysis outputs, this should come from somewhere else
     output_def_file = open("output_definition.json")
     analysis_output = json.load(output_def_file)
@@ -336,13 +354,13 @@ if __name__ == '__main__':
             print("skipping "+cls.__name__)
         else:
             print("create the tool")
-            create_tool(cls, analysis_input, analysis_output)
+            create_tool(cls, analysis_input, analysis_output, auth_headers)
 
     print("ML enabled cges to create")
-    # for cls in CoreCGEML.__subclasses__():
-    #     # print("create")
-    #     # print(cls)
-    #     create_tool(cls, analysis_input, analysis_output)
+    for cls in CoreCGEML.__subclasses__():
+        print("create")
+        print(cls)
+        create_tool(cls, analysis_input, analysis_output, auth_headers)
     # Next steps are to:
     # 1. Finish auto creation of the tool through the datawolf endpoint, currently only tested by manually posting
     # the zip generated
