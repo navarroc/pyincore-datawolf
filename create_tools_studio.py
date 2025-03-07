@@ -1,5 +1,6 @@
 import importlib
 import pkgutil
+import pyincore.analyses
 from pyincore import BaseAnalysis, IncoreClient
 from pyincore.analyses.core_cge_ml import CoreCGEML
 import json
@@ -10,12 +11,13 @@ import uuid
 from datetime import datetime
 
 datawolf_host = "http://localhost:8888"
-my_person_id = "23b516ed-b208-4d56-bc04-a6e9fd6cd5ef"
-
+#datawolf_host = "https://test.in-core.org"
+# datawolf_host = "https://dev.in-core.org"
+my_person_id = ""
 
 # For now, use this to specify whether a tool should be a command line or kubernetes tool
 kube_tool = False
-
+headers = {'Authorization' : 'Bearer some-token'}
 
 def import_submodules(package, recursive=True):
     """ Import all submodules of a module, recursively, including subpackages
@@ -107,7 +109,8 @@ def create_tool(analysis, input_definitions, output_definitions):
     for analysis_input in analysis_inputs:
         param_id = analysis_input["id"]
 
-        # Any inputs listed in the analysis input definition should be created as parameters (e.g. dfr3mappings)
+        # Any inputs not listed in the analysis input definition will be loaded from the service by ID
+        # 9-23-2024 - changing this to the opposite now that we have incore as a service
         if param_id in analysis_input_definitions:
             analysis_param = create_workflow_tool_parameter(param_id, analysis_input["description"],
                                                             not analysis_input['required'], "STRING", False, "")
@@ -116,7 +119,8 @@ def create_tool(analysis, input_definitions, output_definitions):
             cl_option = create_command_line_option("PARAMETER", "", flag, analysis_param["parameterId"], "", "", True)
             command_line_options.append(cl_option)
         else:
-            # Inputs not listed in the analysis input definition will be passed in as files
+            # Inputs listed in the analysis input definition should be chained and will be passed in as files
+            # TODO make this more generalized
             analysis_input_param = create_workflow_tool_data(param_id, analysis_input["description"], "text/csv")
             tool_inputs.append(analysis_input_param)
             flag = "--" + param_id
@@ -180,7 +184,7 @@ def upload_tool(zip_tool):
     print("upload a tool")
     with open(zip_tool, "rb") as file:
         files = {"tool": file}
-        response = requests.post(datawolf_host + "/datawolf/workflowtools", files=files)
+        response = requests.post(datawolf_host + "/datawolf/workflowtools", files=files, headers=headers)
         if response.ok:
             print("uploaded tool")
         else:
@@ -294,7 +298,7 @@ def create_workflow_tool_parameter(title, description, allowNull, type, hidden, 
 
 def get_creator(person_id):
     #response = requests.get("http://192.168.1.36:8888/datawolf/persons/"+person_id)
-    response = requests.get(datawolf_host + "/datawolf/persons/"+person_id)
+    response = requests.get(datawolf_host + "/datawolf/persons/"+person_id, headers=headers)
     return response.json()
 
 
@@ -308,7 +312,7 @@ def get_analysis_info(obj):
 if __name__ == '__main__':
     # TODO replace this with pyincore.analyses when done testing
     # import_submodules(pyincore.analyses.buildingstructuraldamage)
-    # import_submodules(pyincore.analyses)
+    import_submodules(pyincore.analyses)
     print("these are the subclasses")
     print([cls.__name__ for cls in BaseAnalysis.__subclasses__()])
     print([cls.__name__ for cls in CoreCGEML.__subclasses__()])
@@ -328,17 +332,17 @@ if __name__ == '__main__':
         # CoreCGE should be ignored
         if (cls.__name__ == "CoreCGEML"):
             print("cge, skip")
-        elif (cls.__name__ == "BuildingStructuralDamage" or cls.__name__ == "MonteCarloLimitStateProbability"):
+        elif cls.__name__ == "ExampleAnalysis":
             print("skipping "+cls.__name__)
         else:
-            # print("create the tool")
+            print("create the tool")
             create_tool(cls, analysis_input, analysis_output)
 
     print("ML enabled cges to create")
-    for cls in CoreCGEML.__subclasses__():
-        # print("create")
-        # print(cls)
-        create_tool(cls, analysis_input, analysis_output)
+    # for cls in CoreCGEML.__subclasses__():
+    #     # print("create")
+    #     # print(cls)
+    #     create_tool(cls, analysis_input, analysis_output)
     # Next steps are to:
     # 1. Finish auto creation of the tool through the datawolf endpoint, currently only tested by manually posting
     # the zip generated
