@@ -2,7 +2,7 @@ import importlib
 import pkgutil
 import pyincore.analyses
 from pyincore import BaseAnalysis, IncoreClient
-from pyincore import globals as pyglobals
+import pyincore.globals as pyglobals
 from pyincore.analyses.core_cge_ml import CoreCGEML
 import json
 import requests
@@ -12,12 +12,12 @@ import uuid
 import hashlib
 from datetime import datetime
 
-datawolf_host = "http://localhost:8888"
-# datawolf_host = pyglobals.INCORE_API_DEV_URL
-my_person_id = ""
+datawolf_host = os.getenv('DATAWOLF_HOST', "http://localhost:8888")
+my_person_id = os.getenv("DATAWOLF_USER")
 
 # For now, use this to specify whether a tool should be a command line or kubernetes tool
-kube_tool = False
+kube_tool = bool(os.getenv("KUBE_TOOLS", False) == 'True')
+use_auth = bool(os.getenv("USE_AUTH", False) == 'True')
 
 def get_token():
     token_file_name = "." + hashlib.sha256(str.encode(datawolf_host)).hexdigest() + "_token"
@@ -53,8 +53,6 @@ def import_submodules(package, recursive=True):
 
 
 def create_tool(analysis, input_definitions, output_definitions, headers):
-
-    # TODO make this more generalized
     creator = get_creator(my_person_id, headers)
 
     incore_analysis = analysis(IncoreClient())
@@ -71,8 +69,6 @@ def create_tool(analysis, input_definitions, output_definitions, headers):
         analysis_input_definitions = input_definitions[analysis_info[1]]
 
     spec = incore_analysis.get_spec()
-    # response = requests.get("http://localhost:8888/datawolf/workflowtools")
-    # print(response.text)
     tool = {}
     if not kube_tool:
         tool = create_workflow_tool(analysis_info[1], spec["description"], "1.0", "commandline", creator)
@@ -87,19 +83,19 @@ def create_tool(analysis, input_definitions, output_definitions, headers):
 
     # Each tool will need 2 parameters - the analysis name, the service URL and 1 input dataset - an IN-CORE token
     analysis_value = analysis_info[0] + ":" + analysis_info[1]
-    analysis_param = create_workflow_tool_parameter("Analysis", "pyIncore Analysis", False, "STRING", False,
+    analysis_param = create_workflow_tool_parameter("Analysis", "pyIncore Analysis", False, "STRING", True,
                                                     analysis_value)
     tool_parameters.append(analysis_param)
     cl_option = create_command_line_option("PARAMETER", "", "--analysis", analysis_param["parameterId"],
                                            "", "", True)
     command_line_options.append(cl_option)
 
-    analysis_param = create_workflow_tool_parameter("IN-CORE Service", "IN-CORE Service endpoint", False, "STRING",
-                                                    False, "")
-    tool_parameters.append(analysis_param)
-    cl_option = create_command_line_option("PARAMETER", "", "--service_url", analysis_param["parameterId"],
-                                           "", "", True)
-    command_line_options.append(cl_option)
+    #analysis_param = create_workflow_tool_parameter("IN-CORE Service", "IN-CORE Service endpoint", False, "STRING",
+    #                                                True, "")
+    #tool_parameters.append(analysis_param)
+    # cl_option = create_command_line_option("PARAMETER", "", "--service_url", analysis_param["parameterId"],
+    #                                        "", "", True)
+    # command_line_options.append(cl_option)
 
     analysis_parameters = spec["input_parameters"]
     for input_param in analysis_parameters:
@@ -135,14 +131,15 @@ def create_tool(analysis, input_definitions, output_definitions, headers):
         else:
             # Inputs listed in the analysis input definition should be chained and will be passed in as files
             # TODO make this more generalized
-            analysis_input_param = create_workflow_tool_data(param_id, analysis_input["description"], "text/csv")
+            analysis_input_param = create_workflow_tool_data(param_id, analysis_input["description"],
+                                                             not analysis_input["required"], "text/csv")
             tool_inputs.append(analysis_input_param)
             flag = "--" + param_id
             cl_option = create_command_line_option("DATA", "", flag, analysis_input_param["dataId"], "INPUT",
                                                    "", True)
             command_line_options.append(cl_option)
 
-    stdout = create_workflow_tool_data("stdout", "stdout of external tool", "text/plain")
+    stdout = create_workflow_tool_data("stdout", "stdout of external tool", False,"text/plain")
     stdout["dataId"] = "stdout"
     tool_outputs.append(stdout)
 
@@ -163,7 +160,7 @@ def create_tool(analysis, input_definitions, output_definitions, headers):
         #if "description" in analysis_output:
         #    description = analysis_output["description"]
 
-        output = create_workflow_tool_data(output_id, description, mime_type)
+        output = create_workflow_tool_data(output_id, description, False, mime_type)
         tool_outputs.append(output)
 
         cl_option = create_command_line_option("DATA", "", "", output["dataId"], "OUTPUT", filename, True)
@@ -226,7 +223,6 @@ def create_workflow_tool(title, description, version, executor, creator):
     current_date = datetime.utcnow().isoformat()[:-3]+'Z'
 
     tool["id"] = tool_id
-    # tool["title"] = title + "-4"
     tool["title"] = title
     tool["date"] = str(current_date)
     tool["description"] = description
@@ -237,13 +233,14 @@ def create_workflow_tool(title, description, version, executor, creator):
     return tool
 
 
-def create_workflow_tool_data(title, description, mimetype):
+def create_workflow_tool_data(title, description, allowNull, mimetype):
     wf_tool_data = {}
     wf_tool_data["id"] = str(uuid.uuid4())
     wf_tool_data["dataId"] = str(uuid.uuid4())
     wf_tool_data["title"] = title
     wf_tool_data["description"] = description
     wf_tool_data["mimeType"] = mimetype
+    wf_tool_data["allowNull"] = allowNull
 
     return wf_tool_data
 
@@ -296,12 +293,14 @@ def create_command_line_option(type, value, flag, option_id, input_output, filen
 
 def create_workflow_tool_parameter(title, description, allowNull, type, hidden, value):
     # print("description length: ")
-    # print(len(description))
+    if len(description) > 255:
+        print("Warning - description is too long for "+title)
+        print(len(description))
     wf_param = {}
     wf_param["id"] = str(uuid.uuid4())
     wf_param["parameterId"] = str(uuid.uuid4())
     wf_param["title"] = title
-    wf_param["description"] = title
+    wf_param["description"] = description
     wf_param["type"] = type
     wf_param["hidden"] = hidden
     wf_param["allowNull"] = allowNull
@@ -311,7 +310,6 @@ def create_workflow_tool_parameter(title, description, allowNull, type, hidden, 
 
 
 def get_creator(person_id, headers):
-    #response = requests.get("http://192.168.1.36:8888/datawolf/persons/"+person_id)
     response = requests.get(datawolf_host + "/datawolf/persons/"+person_id, headers=headers)
     return response.json()
 
@@ -324,16 +322,16 @@ def get_analysis_info(obj):
 
 
 if __name__ == '__main__':
-    # TODO replace this with pyincore.analyses when done testing
-    # import_submodules(pyincore.analyses.buildingstructuraldamage)
     import_submodules(pyincore.analyses)
     print("these are the subclasses")
     print([cls.__name__ for cls in BaseAnalysis.__subclasses__()])
     print([cls.__name__ for cls in CoreCGEML.__subclasses__()])
 
     # Gets the IN-CORE token for the IN-CORE host specified
-    auth_headers = get_token()
-    print(auth_headers)
+    if use_auth:
+        auth_headers = get_token()
+    else:
+        auth_headers = {}
 
     # Hack to inform datawolf of how to collect the analysis outputs, this should come from somewhere else
     output_def_file = open("output_definition.json")
@@ -343,10 +341,9 @@ if __name__ == '__main__':
     input_def_file = open("input_definition_studio.json")
     analysis_input = json.load(input_def_file)
 
+    total = 0
     # Create all analyses
     for cls in BaseAnalysis.__subclasses__():
-        print("create")
-        print(cls)
         # CoreCGE should be ignored
         if (cls.__name__ == "CoreCGEML"):
             print("cge, skip")
@@ -354,16 +351,19 @@ if __name__ == '__main__':
             print("skipping "+cls.__name__)
         else:
             print("create the tool")
+            print(cls)
+            total = total + 1
             create_tool(cls, analysis_input, analysis_output, auth_headers)
 
     print("ML enabled cges to create")
     for cls in CoreCGEML.__subclasses__():
         print("create")
         print(cls)
+        total = total + 1
         create_tool(cls, analysis_input, analysis_output, auth_headers)
+
+    print("how many analyses = "+str(total))
     # Next steps are to:
     # 1. Finish auto creation of the tool through the datawolf endpoint, currently only tested by manually posting
     # the zip generated
     # 2. Generalize so you can configure which datawolf service to talk to and what user to create the tools under
-    # 3. Add more to output_definition.json for all pyincore analyses
-    # 4. Replace pyincore.analyses.bridgedamage with reading all pyincore.analyses once post happens through this tool
