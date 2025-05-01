@@ -159,8 +159,9 @@ if __name__ == '__main__':
     for val in unknown:
         if val.startswith("--"):
             if key is not None:
-                # Hack for fragility keys, which can contain spaces, in which case we don't want to split the string
-                if len(values.split()) > 1 and key != "fragility_key":
+                # Hack for fragility keys and result name, which can contain spaces, in which case we don't want to
+                # split the string
+                if len(values.split()) > 1 and key != "fragility_key" and key != "result_name":
                     values = values.split()
                 else:
                     values = values.strip()
