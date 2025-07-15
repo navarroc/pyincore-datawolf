@@ -183,8 +183,8 @@
    },
    "TrafficFlowRecovery":{
       "optimal_solution_of_bridge_repair_schedule": { "mimeType" : "text/csv", "filename": "*optimal_solution_of_bridge_repair_schedule.csv", "format": "table"},
-      "overall_traffic_flow_recovery_trajectory": {"mimeType" : "text/csv", "filename": "*overall_traffic_flow_recovery_trajectory.csvS",
-         "format": "json"}
+      "overall_traffic_flow_recovery_trajectory": {"mimeType" : "text/csv", "filename": "*overall_traffic_flow_recovery_trajectory.csv",
+         "format": "table"}
    },
    "WaterFacilityDamage":{
       "result": { "mimeType" : "text/csv", "filename": "*.csv", "format": "table"},
