@@ -116,6 +116,34 @@
       "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
       "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
    },
+   "MlEnabledCgeSeaside":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MlEnabledCgeGalvestonIsland":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MlEnabledCgeMobile":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
+   "MlEnabledCgeLumberton":{
+      "domestic-supply": { "mimeType" : "text/csv", "filename": "*domestic-supply.csv", "format": "table"},
+      "gross-income": { "mimeType" : "text/csv", "filename": "*gross-income.csv", "format": "table"},
+      "pre-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*pre-disaster-factor-demand.csv", "format": "table"},
+      "post-disaster-factor-demand": { "mimeType" : "text/csv", "filename": "*post-disaster-factor-demand.csv", "format": "table"},
+      "household-count": { "mimeType" : "text/csv", "filename": "*household-count.csv", "format": "table"}
+   },
    "MonteCarloFailureProbability":{
       "failure_probability": { "mimeType" : "text/csv", "filename": "*_failure_probability.csv", "format": "table"},
       "sample_failure_state": { "mimeType" : "text/csv", "filename": "*_failure_state.csv", "format": "table"},
