@@ -223,7 +223,7 @@ def create_workflow_tool(title, description, version, executor, creator):
     current_date = datetime.utcnow().isoformat()[:-3]+'Z'
 
     tool["id"] = tool_id
-    tool["title"] = title
+    tool["title"] = "Studio-Kube-" + title
     tool["date"] = str(current_date)
     tool["description"] = description
     tool["version"] = version
