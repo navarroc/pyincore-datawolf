@@ -1,0 +1,8 @@
+#USE_AUTH=true
+USE_AUTH=false
+DATAWOLF_HOST=http://localhost:8888
+DATAWOLF_USER=person-id
+
+KUBE_TOOLS=false
+#KUBE_TOOLS=true
+
