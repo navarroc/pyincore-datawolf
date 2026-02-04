@@ -1,0 +1,13 @@
+name: pyincore
+channels:
+  - conda-forge
+  - in-core
+  - in-core/label/rc
+dependencies:
+  - python=3.9
+  - pyincore=1.21.0
+  - pyincore-viz=1.11.1
+  - geopandas
+  - python-duckdb
+  - deprecated
+
